@@ -21,9 +21,11 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label="Toggle dark mode"
-      className="text-cream-dark hover:text-cream transition-colors"
+      title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="inline-flex items-center gap-2 rounded-full border border-cream-dark/50 bg-cream/10 px-3 py-1.5 text-sm text-cream transition-colors hover:bg-cream/20"
     >
-      {dark ? '☀️' : '🌙'}
+      <span aria-hidden="true">{dark ? '☀' : '☾'}</span>
+      <span>{dark ? 'Light' : 'Dark'}</span>
     </button>
   );
 }

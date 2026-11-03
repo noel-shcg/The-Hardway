@@ -27,16 +27,67 @@ body {
 }
 
 html.dark {
-  --background: #111827;
-  --foreground: #f5f0e6;
-  --navy: #dbeafe;
-  --cream: #111827;
-  --navy-light: #93c5fd;
-  --cream-dark: #1f2937;
+  --background: #0b1220;
+  --foreground: #e5e7eb;
+  --navy: #0f172a;
+  --cream: #f8fafc;
+  --navy-light: #60a5fa;
+  --cream-dark: #1e293b;
 }
 
 .dark body {
   background: var(--background);
+  color: var(--foreground);
+}
+
+.dark .bg-white {
+  background-color: #162033;
+}
+
+.dark .bg-cream {
+  background-color: var(--background);
+}
+
+.dark .bg-cream-dark {
+  background-color: #1e293b;
+}
+
+.dark .text-navy {
+  color: #e5e7eb;
+}
+
+.dark .text-navy-light {
+  color: #93c5fd;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #111827;
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8;
+}
+
+.dark .border-cream-dark {
+  border-color: #334155;
+}
+
+.dark .shadow-md,
+.dark .shadow-lg {
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.25);
+}
+
+.dark .hover\:bg-cream:hover {
+  background-color: #334155;
+}
+
+.dark .hover\:bg-cream-dark:hover {
+  background-color: #475569;
 }
 
 @media print {
