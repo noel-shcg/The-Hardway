@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { getVehicleById, updateVehicle } from '@/lib/client-data';
 import Link from 'next/link';
 import DeleteReviewButton from '@/components/DeleteReviewButton';
 import EditPhotoMetadata from '@/components/EditPhotoMetadata';
-import { ImageMetadata } from '@/types';
+import { ImageMetadata, Vehicle } from '@/types';
+import ImageLightbox from '@/components/ImageLightbox';
+import DeleteButton from '@/components/DeleteButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,18 +21,19 @@ const statusColors = {
 };
 
 export default function VehicleDetail() {
-  const router = useRouter();
   const params = useParams();
-  const [vehicle, setVehicle] = useState<any>(null);
+  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const loadVehicle = async () => {
       const v = await getVehicleById(params.id as string);
-      setVehicle(v);
+      setVehicle(v ?? null);
       setLoading(false);
     };
     loadVehicle();
+    fetch('/api/auth/login').then((response) => setIsLoggedIn(response.ok)).catch(() => setIsLoggedIn(false));
   }, [params.id]);
 
   const handlePhotoMetadataUpdate = async (index: number, metadata: ImageMetadata) => {
@@ -167,8 +170,9 @@ export default function VehicleDetail() {
           {vehicle.photoAlbum.length > 0 && (
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h2 className="text-2xl font-bold text-navy mb-4">Photo Album</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {vehicle.photoAlbum.map((photo: any, index: number) => (
+              <ImageLightbox images={vehicle.photoAlbum.map((photo) => typeof photo === 'string' ? photo : photo.url)} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                {vehicle.photoAlbum.map((photo, index) => (
                   <div key={index} className="space-y-2">
                     <img
                       src={typeof photo === 'string' ? photo : photo.url}
@@ -209,6 +213,18 @@ export default function VehicleDetail() {
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-navy mb-4">Reviews</h2>
+            {vehicle.reviews.length > 0 && (
+              <div className="bg-cream-dark rounded-lg p-4 mb-6">
+                <p className="text-navy font-bold text-lg">
+                  Average rating: {(vehicle.reviews.reduce((sum, review) => sum + review.rating, 0) / vehicle.reviews.length).toFixed(1)} / 5
+                </p>
+                <div className="flex gap-2 text-sm text-navy-light mt-2">
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <span key={rating}>{rating}: {vehicle.reviews.filter((review) => review.rating === rating).length}</span>
+                  ))}
+                </div>
+              </div>
+            )}
             {vehicle.reviews.length === 0 ? (
               <p className="text-navy-light">No reviews yet.</p>
             ) : (
@@ -233,7 +249,7 @@ export default function VehicleDetail() {
                             </span>
                           ))}
                         </div>
-                        <DeleteReviewButton vehicleId={vehicle.id} reviewId={review.id} />
+                        {isLoggedIn && <DeleteReviewButton vehicleId={vehicle.id} reviewId={review.id} />}
                       </div>
                     </div>
                     <p className="text-navy">{review.content}</p>
@@ -273,18 +289,22 @@ export default function VehicleDetail() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-navy mb-4">Actions</h2>
             <div className="space-y-3">
-              <Link
+              {isLoggedIn && <Link
                 href={`/fleet/${vehicle.id}/edit`}
                 className="block w-full bg-navy text-cream px-4 py-2 rounded-lg hover:bg-navy-light transition-colors text-center"
               >
                 Edit Vehicle
-              </Link>
+              </Link>}
               <Link
                 href={`/fleet/${vehicle.id}/add-review`}
                 className="block w-full bg-navy-light text-cream px-4 py-2 rounded-lg hover:bg-navy transition-colors text-center"
               >
                 Add Review
               </Link>
+              <button type="button" onClick={() => window.print()} className="block w-full bg-cream-dark text-navy px-4 py-2 rounded-lg hover:bg-cream transition-colors text-center">
+                Print Vehicle
+              </button>
+              {isLoggedIn && <DeleteButton endpoint={`/api/vehicles/${vehicle.id}`} label="vehicle" />}
             </div>
           </div>
         </div>

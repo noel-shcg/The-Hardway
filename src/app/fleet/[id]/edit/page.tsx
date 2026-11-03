@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { getVehicleById, updateVehicle } from '@/lib/client-data';
 import { EmissionsRating, VehicleFeature, VehicleStatus, ImageMetadata } from '@/types';
 import ImageUploadWithMetadata from '@/components/ImageUploadWithMetadata';
+import BulkImageUpload from '@/components/BulkImageUpload';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,7 @@ export default function EditVehicle() {
     photoAlbum: [] as ImageMetadata[],
     liveryImage: '',
     liveryImageMetadata: undefined as ImageMetadata | undefined,
+    featured: false,
   });
 
   const [loading, setLoading] = useState(true);
@@ -57,9 +59,10 @@ export default function EditVehicle() {
           status: vehicle.status,
           primaryPhoto: vehicle.primaryPhoto,
           primaryPhotoMetadata: vehicle.primaryPhotoMetadata,
-          photoAlbum: vehicle.photoAlbum.map((p: any) => typeof p === 'string' ? { url: p } : p),
+          photoAlbum: vehicle.photoAlbum.map((p: ImageMetadata | string) => typeof p === 'string' ? { url: p } : p),
           liveryImage: vehicle.liveryImage,
           liveryImageMetadata: vehicle.liveryImageMetadata,
+          featured: vehicle.featured || false,
         });
       }
       setLoading(false);
@@ -101,15 +104,19 @@ export default function EditVehicle() {
     });
   };
 
-  const addPhoto = (metadata: ImageMetadata) => {
-    setFormData({ ...formData, photoAlbum: [...formData.photoAlbum, metadata] });
-  };
-
   const removePhoto = (index: number) => {
     setFormData({
       ...formData,
       photoAlbum: formData.photoAlbum.filter((_, i) => i !== index),
     });
+  };
+
+  const movePhoto = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= formData.photoAlbum.length) return;
+    const photoAlbum = [...formData.photoAlbum];
+    [photoAlbum[index], photoAlbum[target]] = [photoAlbum[target], photoAlbum[index]];
+    setFormData({ ...formData, photoAlbum });
   };
 
   const features: VehicleFeature[] = [
@@ -298,6 +305,13 @@ export default function EditVehicle() {
         </div>
 
         <div>
+          <label className="flex items-center gap-2 text-navy font-medium">
+            <input type="checkbox" checked={formData.featured} onChange={(e) => setFormData({ ...formData, featured: e.target.checked })} />
+            Feature this vehicle
+          </label>
+        </div>
+
+        <div>
           <label className="block text-navy font-medium mb-2">History</label>
           <textarea
             value={formData.history}
@@ -320,32 +334,7 @@ export default function EditVehicle() {
 
         <div>
           <label className="block text-navy font-medium mb-2">Photo Album</label>
-          <div className="border-2 border-dashed border-navy-light rounded-lg p-6 text-center mb-4">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const formData = new FormData();
-                  formData.append('file', file);
-                  formData.append('folder', 'vehicles');
-                  fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData,
-                  })
-                    .then(res => res.json())
-                    .then(data => addPhoto({ url: data.url }));
-                }
-              }}
-              className="hidden"
-              id="album-upload"
-            />
-            <label htmlFor="album-upload" className="cursor-pointer">
-              <p className="text-navy font-medium">Click to add photo to album</p>
-              <p className="text-sm text-navy-light">You can add metadata after uploading</p>
-            </label>
-          </div>
+          <BulkImageUpload onUploaded={(images) => setFormData({ ...formData, photoAlbum: [...formData.photoAlbum, ...images] })} />
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {formData.photoAlbum.map((photo, index) => (
               <div key={index} className="relative">
@@ -362,6 +351,10 @@ export default function EditVehicle() {
                 >
                   ×
                 </button>
+                <div className="absolute bottom-1 left-1 flex gap-1">
+                  <button type="button" disabled={index === 0} onClick={() => movePhoto(index, -1)} className="bg-white/90 text-navy rounded px-2 disabled:opacity-40">←</button>
+                  <button type="button" disabled={index === formData.photoAlbum.length - 1} onClick={() => movePhoto(index, 1)} className="bg-white/90 text-navy rounded px-2 disabled:opacity-40">→</button>
+                </div>
               </div>
             ))}
           </div>

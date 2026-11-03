@@ -1,5 +1,6 @@
 import { getVehicles } from '@/lib/data';
 import Link from 'next/link';
+import { isAuthenticated } from '@/lib/auth';
 
 const statusColors = {
   'service-worthy': 'bg-green-500',
@@ -9,19 +10,20 @@ const statusColors = {
   'auxillary': 'bg-blue-500',
 };
 
-export default function FleetList() {
+export default async function FleetList() {
   const vehicles = getVehicles();
+  const authenticated = await isAuthenticated();
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold text-navy">Vehicle Fleet</h1>
-        <Link 
+        {authenticated && <Link
           href="/fleet/create"
           className="bg-navy text-cream px-6 py-2 rounded-lg hover:bg-navy-light transition-colors"
         >
           Add Vehicle
-        </Link>
+        </Link>}
       </div>
 
       {vehicles.length === 0 ? (
@@ -66,7 +68,7 @@ export default function FleetList() {
                     <td className="px-4 py-3">{vehicle.engineType}</td>
                     <td className="px-4 py-3">{vehicle.gearboxType}</td>
                     <td className="px-4 py-3">{vehicle.chassisType}</td>
-                    <td className="px-4 py-3">{vehicle.livery}</td>
+                    <td className="px-4 py-3">{vehicle.livery} {vehicle.featured && <span className="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full">Featured</span>}</td>
                     <td className="px-4 py-3">
                       <Link
                         href={`/fleet/${vehicle.id}`}

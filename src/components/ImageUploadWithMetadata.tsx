@@ -29,9 +29,10 @@ export default function ImageUploadWithMetadata({
   const [metadata, setMetadata] = useState<ImageMetadataProps>(
     existingMetadata || { url: '' }
   );
+  const [dragging, setDragging] = useState(false);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileUpload = async (input: File | React.ChangeEvent<HTMLInputElement>) => {
+    const file = input instanceof File ? input : input.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
@@ -72,11 +73,16 @@ export default function ImageUploadWithMetadata({
       <label className="block text-navy font-medium mb-2">{label}</label>
       
       {!metadata.url ? (
-        <div className="border-2 border-dashed border-navy-light rounded-lg p-6 text-center">
+        <div
+          className={`border-2 border-dashed border-navy-light rounded-lg p-6 text-center ${dragging ? 'bg-cream-dark' : ''}`}
+          onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(event) => { event.preventDefault(); setDragging(false); const file = event.dataTransfer.files[0]; if (file) handleFileUpload(file); }}
+        >
           <input
             type="file"
             accept="image/*"
-            onChange={handleFileUpload}
+            onChange={(event) => handleFileUpload(event)}
             disabled={uploading}
             className="hidden"
             id={`file-upload-${label}`}

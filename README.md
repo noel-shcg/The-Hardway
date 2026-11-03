@@ -16,6 +16,16 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Local admin access
+
+The app uses a local, cookie-based admin login; it does not use Clerk or any hosted authentication service. Set `ADMIN_PASSWORD` in `.env.local` before starting the app:
+
+```env
+ADMIN_PASSWORD=choose-a-local-password
+```
+
+If it is not set, development falls back to `thehardway`. Login at `/login` to add, edit, upload, reorder, and delete fleet or blog content. Public visitors can still browse published content.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

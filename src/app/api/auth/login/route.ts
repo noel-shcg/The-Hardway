@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'thehardway';
   
   if (password === ADMIN_PASSWORD) {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set('auth', 'true', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -23,7 +23,15 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.delete('auth');
   return NextResponse.json({ success: true });
+}
+
+export async function GET() {
+  const cookieStore = await cookies();
+  return NextResponse.json(
+    { authenticated: cookieStore.get('auth')?.value === 'true' },
+    { status: cookieStore.get('auth')?.value === 'true' ? 200 : 401 },
+  );
 }

@@ -1,19 +1,21 @@
 import { getBlogPosts } from '@/lib/data';
 import Link from 'next/link';
+import { isAuthenticated } from '@/lib/auth';
 
-export default function BlogList() {
+export default async function BlogList() {
   const blogPosts = getBlogPosts();
+  const authenticated = await isAuthenticated();
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold text-navy">Blog Posts</h1>
-        <Link 
+        {authenticated && <Link
           href="/blog/create"
           className="bg-navy text-cream px-6 py-2 rounded-lg hover:bg-navy-light transition-colors"
         >
           Create New Post
-        </Link>
+        </Link>}
       </div>
 
       {blogPosts.length === 0 ? (
@@ -43,6 +45,10 @@ export default function BlogList() {
               )}
               <div className="p-4">
                 <h3 className="text-xl font-bold text-navy mb-2">{post.title}</h3>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {(post.categories || []).map((category) => <span key={category} className="text-xs bg-navy-light text-cream px-2 py-1 rounded-full">{category}</span>)}
+                  {post.featured && <span className="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full">Featured</span>}
+                </div>
                 <p className="text-sm text-navy-light mb-2">
                   By {post.author} • {new Date(post.createdAt).toLocaleDateString()}
                 </p>

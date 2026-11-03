@@ -25,3 +25,32 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+html.dark {
+  --background: #111827;
+  --foreground: #f5f0e6;
+  --navy: #dbeafe;
+  --cream: #111827;
+  --navy-light: #93c5fd;
+  --cream-dark: #1f2937;
+}
+
+.dark body {
+  background: var(--background);
+}
+
+@media print {
+  nav,
+  footer,
+  button,
+  a[href*="/edit"],
+  a[href="/fleet"],
+  a[href="/blog"] {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}
