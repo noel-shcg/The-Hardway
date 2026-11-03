@@ -52,6 +52,8 @@ export default function VehicleDetail() {
     return <div className="max-w-7xl mx-auto px-4 py-8">Vehicle not found</div>;
   }
 
+  const status = vehicle.status || 'service-worthy';
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <Link 
@@ -95,9 +97,9 @@ export default function VehicleDetail() {
               {vehicle.fleetNumber} - {vehicle.registration}
             </h1>
             <div className="flex items-center gap-2">
-              <div className={`w-4 h-4 rounded-full ${statusColors[vehicle.status]}`} />
+              <div className={`w-4 h-4 rounded-full ${statusColors[status]}`} />
               <span className="capitalize text-navy-light">
-                {vehicle.status.replace('-', ' ')}
+                {status.replace('-', ' ')}
               </span>
             </div>
           </div>

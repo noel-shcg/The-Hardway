@@ -26,6 +26,14 @@ ADMIN_PASSWORD=choose-a-local-password
 
 If it is not set, development falls back to `thehardway`. Login at `/login` to add, edit, upload, reorder, and delete fleet or blog content. Public visitors can still browse published content.
 
+Copy `.env.example` to `.env` and set your password before using Docker:
+
+```bash
+docker compose up --build -d
+```
+
+The JSON database and uploaded images are stored in named Docker volumes, so container rebuilds do not remove your content. Stop the container with `docker compose down`; keep the volumes to preserve data.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
