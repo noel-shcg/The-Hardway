@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "registration": "AB12 CDE",
+    "fleetNumber": "001",
+    "vehicleType": "Double Decker",
+    "engineType": "Diesel",
+    "gearboxType": "Automatic",
+    "chassisType": "Volvo B9TL",
+    "livery": "Standard Blue",
+    "branding": "The Hardway",
+    "emissionsRating": "euro 5",
+    "features": ["USB-A", "WiFi", "announcements"],
+    "history": "Acquired in 2020, originally operated in London before joining The Hardway fleet.",
+    "vehicleDelivered": "2020-01-15",
+    "vehicleJoinedFleet": "2020-02-01",
+    "status": "service-worthy",
+    "primaryPhoto": "https://via.placeholder.com/800x600/1E3A8A/FFFDD0?text=Bus+001",
+    "photoAlbum": [
+      "https://via.placeholder.com/400x300/1E3A8A/FFFDD0?text=Interior",
+      "https://via.placeholder.com/400x300/1E3A8A/FFFDD0?text=Exterior"
+    ],
+    "liveryImage": "https://via.placeholder.com/380x260/1E3A8A/FFFDD0?text=Livery",
+    "reviews": []
+  }
+]

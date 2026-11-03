@@ -1,0 +1,326 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { createVehicle } from '@/lib/client-data';
+import { EmissionsRating, VehicleFeature, VehicleStatus } from '@/types';
+
+export const dynamic = 'force-dynamic';
+
+export default function CreateVehicle() {
+  const router = useRouter();
+  
+  const [formData, setFormData] = useState({
+    registration: '',
+    fleetNumber: '',
+    vehicleType: '',
+    engineType: '',
+    gearboxType: '',
+    chassisType: '',
+    livery: '',
+    branding: '',
+    emissionsRating: 'euro 6' as EmissionsRating,
+    features: [] as VehicleFeature[],
+    history: '',
+    vehicleDelivered: '',
+    vehicleJoinedFleet: '',
+    status: 'service-worthy' as VehicleStatus,
+    primaryPhoto: '',
+    photoAlbum: [] as string[],
+    liveryImage: '',
+  });
+
+  const [newPhoto, setNewPhoto] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await createVehicle({ ...formData, reviews: [] });
+    router.push('/fleet');
+  };
+
+  const toggleFeature = (feature: VehicleFeature) => {
+    setFormData({
+      ...formData,
+      features: formData.features.includes(feature)
+        ? formData.features.filter(f => f !== feature)
+        : [...formData.features, feature],
+    });
+  };
+
+  const addPhoto = () => {
+    if (newPhoto.trim()) {
+      setFormData({ ...formData, photoAlbum: [...formData.photoAlbum, newPhoto.trim()] });
+      setNewPhoto('');
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setFormData({
+      ...formData,
+      photoAlbum: formData.photoAlbum.filter((_, i) => i !== index),
+    });
+  };
+
+  const features: VehicleFeature[] = [
+    'USB-A', 'USB-C', 'WiFi', 'announcements', 'flip-dot internal screens', 'TV internal screens'
+  ];
+
+  const emissionsRatings: EmissionsRating[] = [
+    'euro 1', 'euro 2', 'euro 3', 'euro 4', 'euro 5', 'euro 6', 'zero emissions'
+  ];
+
+  const statuses: VehicleStatus[] = [
+    'service-worthy', 'off-road', 'away', 'trainer', 'auxillary'
+  ];
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h1 className="text-4xl font-bold text-navy mb-8">Add Vehicle</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-navy font-medium mb-2">Registration</label>
+            <input
+              type="text"
+              value={formData.registration}
+              onChange={(e) => setFormData({ ...formData, registration: e.target.value })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-navy font-medium mb-2">Fleet Number</label>
+            <input
+              type="text"
+              value={formData.fleetNumber}
+              onChange={(e) => setFormData({ ...formData, fleetNumber: e.target.value })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-navy font-medium mb-2">Vehicle Type</label>
+            <input
+              type="text"
+              value={formData.vehicleType}
+              onChange={(e) => setFormData({ ...formData, vehicleType: e.target.value })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-navy font-medium mb-2">Engine Type</label>
+            <input
+              type="text"
+              value={formData.engineType}
+              onChange={(e) => setFormData({ ...formData, engineType: e.target.value })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-navy font-medium mb-2">Gearbox Type</label>
+            <input
+              type="text"
+              value={formData.gearboxType}
+              onChange={(e) => setFormData({ ...formData, gearboxType: e.target.value })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-navy font-medium mb-2">Chassis Type</label>
+            <input
+              type="text"
+              value={formData.chassisType}
+              onChange={(e) => setFormData({ ...formData, chassisType: e.target.value })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-navy font-medium mb-2">Livery</label>
+            <input
+              type="text"
+              value={formData.livery}
+              onChange={(e) => setFormData({ ...formData, livery: e.target.value })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-navy font-medium mb-2">Branding</label>
+            <input
+              type="text"
+              value={formData.branding}
+              onChange={(e) => setFormData({ ...formData, branding: e.target.value })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-navy font-medium mb-2">Emissions Rating</label>
+            <select
+              value={formData.emissionsRating}
+              onChange={(e) => setFormData({ ...formData, emissionsRating: e.target.value as EmissionsRating })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+            >
+              {emissionsRatings.map((rating) => (
+                <option key={rating} value={rating}>
+                  {rating.charAt(0).toUpperCase() + rating.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-navy font-medium mb-2">Status</label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as VehicleStatus })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+            >
+              {statuses.map((status) => (
+                <option key={status} value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-navy font-medium mb-2">Vehicle Delivered</label>
+            <input
+              type="date"
+              value={formData.vehicleDelivered}
+              onChange={(e) => setFormData({ ...formData, vehicleDelivered: e.target.value })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+            />
+          </div>
+          <div>
+            <label className="block text-navy font-medium mb-2">Joined Fleet</label>
+            <input
+              type="date"
+              value={formData.vehicleJoinedFleet}
+              onChange={(e) => setFormData({ ...formData, vehicleJoinedFleet: e.target.value })}
+              className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-navy font-medium mb-2">Features</label>
+          <div className="flex flex-wrap gap-2">
+            {features.map((feature) => (
+              <button
+                key={feature}
+                type="button"
+                onClick={() => toggleFeature(feature)}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  formData.features.includes(feature)
+                    ? 'bg-navy text-cream'
+                    : 'bg-cream-dark text-navy hover:bg-cream'
+                }`}
+              >
+                {feature}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-navy font-medium mb-2">History</label>
+          <textarea
+            value={formData.history}
+            onChange={(e) => setFormData({ ...formData, history: e.target.value })}
+            className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy min-h-[150px]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-navy font-medium mb-2">Primary Photo URL</label>
+          <input
+            type="url"
+            value={formData.primaryPhoto}
+            onChange={(e) => setFormData({ ...formData, primaryPhoto: e.target.value })}
+            className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+          />
+        </div>
+
+        <div>
+          <label className="block text-navy font-medium mb-2">Livery Image URL</label>
+          <input
+            type="url"
+            value={formData.liveryImage}
+            onChange={(e) => setFormData({ ...formData, liveryImage: e.target.value })}
+            className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+          />
+        </div>
+
+        <div>
+          <label className="block text-navy font-medium mb-2">Photo Album</label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="url"
+              value={newPhoto}
+              onChange={(e) => setNewPhoto(e.target.value)}
+              className="flex-1 p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
+              placeholder="Add photo URL"
+            />
+            <button
+              type="button"
+              onClick={addPhoto}
+              className="bg-navy-light text-cream px-6 py-3 rounded-lg hover:bg-navy transition-colors"
+            >
+              Add
+            </button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {formData.photoAlbum.map((photo, index) => (
+              <div key={index} className="relative">
+                <img src={photo} alt={`Photo ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                <button
+                  type="button"
+                  onClick={() => removePhoto(index)}
+                  className="absolute top-2 right-2 bg-red-600 text-white w-6 h-6 rounded-full hover:bg-red-700 transition-colors"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            className="bg-navy text-cream px-6 py-3 rounded-lg hover:bg-navy-light transition-colors"
+          >
+            Add Vehicle
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/fleet')}
+            className="bg-cream-dark text-navy px-6 py-3 rounded-lg hover:bg-cream transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "title": "Welcome to The Hardway",
+    "headerImage": "https://via.placeholder.com/800x400/1E3A8A/FFFDD0?text=Welcome",
+    "photoAlbum": [
+      "https://via.placeholder.com/400x300/1E3A8A/FFFDD0?text=Photo+1",
+      "https://via.placeholder.com/400x300/1E3A8A/FFFDD0?text=Photo+2"
+    ],
+    "body": "Welcome to The Hardway! This is my new website dedicated to documenting my bus fleet and sharing my experiences. I'll be adding more vehicles and blog posts soon. Stay tuned for updates!",
+    "author": "Noel Hands",
+    "linkedVehicleId": "1",
+    "createdAt": "2026-11-02T00:00:00.000Z",
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  }
+]
