@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createVehicle } from '@/lib/client-data';
-import { EmissionsRating, VehicleFeature, VehicleStatus } from '@/types';
+import { EmissionsRating, VehicleFeature, VehicleStatus, ImageMetadata } from '@/types';
+import ImageUploadWithMetadata from '@/components/ImageUploadWithMetadata';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,15 +27,19 @@ export default function CreateVehicle() {
     vehicleJoinedFleet: '',
     status: 'service-worthy' as VehicleStatus,
     primaryPhoto: '',
-    photoAlbum: [] as string[],
+    primaryPhotoMetadata: undefined as ImageMetadata | undefined,
+    photoAlbum: [] as ImageMetadata[],
     liveryImage: '',
+    liveryImageMetadata: undefined as ImageMetadata | undefined,
   });
-
-  const [newPhoto, setNewPhoto] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createVehicle({ ...formData, reviews: [] });
+    await createVehicle({ 
+      ...formData, 
+      reviews: [],
+      photoAlbum: formData.photoAlbum.map(p => typeof p === 'string' ? { url: p } : p)
+    });
     router.push('/fleet');
   };
 
@@ -47,11 +52,24 @@ export default function CreateVehicle() {
     });
   };
 
-  const addPhoto = () => {
-    if (newPhoto.trim()) {
-      setFormData({ ...formData, photoAlbum: [...formData.photoAlbum, newPhoto.trim()] });
-      setNewPhoto('');
-    }
+  const handlePrimaryPhotoUpload = (metadata: ImageMetadata) => {
+    setFormData({
+      ...formData,
+      primaryPhoto: metadata.url,
+      primaryPhotoMetadata: metadata,
+    });
+  };
+
+  const handleLiveryImageUpload = (metadata: ImageMetadata) => {
+    setFormData({
+      ...formData,
+      liveryImage: metadata.url,
+      liveryImageMetadata: metadata,
+    });
+  };
+
+  const addPhoto = (metadata: ImageMetadata) => {
+    setFormData({ ...formData, photoAlbum: [...formData.photoAlbum, metadata] });
   };
 
   const removePhoto = (index: number) => {
@@ -251,48 +269,55 @@ export default function CreateVehicle() {
           />
         </div>
 
-        <div>
-          <label className="block text-navy font-medium mb-2">Primary Photo URL</label>
-          <input
-            type="url"
-            value={formData.primaryPhoto}
-            onChange={(e) => setFormData({ ...formData, primaryPhoto: e.target.value })}
-            className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
-          />
-        </div>
+        <ImageUploadWithMetadata
+          label="Primary Photo"
+          onUpload={handlePrimaryPhotoUpload}
+          existingMetadata={formData.primaryPhotoMetadata}
+        />
 
-        <div>
-          <label className="block text-navy font-medium mb-2">Livery Image URL</label>
-          <input
-            type="url"
-            value={formData.liveryImage}
-            onChange={(e) => setFormData({ ...formData, liveryImage: e.target.value })}
-            className="w-full p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
-          />
-        </div>
+        <ImageUploadWithMetadata
+          label="Livery Image"
+          onUpload={handleLiveryImageUpload}
+          existingMetadata={formData.liveryImageMetadata}
+        />
 
         <div>
           <label className="block text-navy font-medium mb-2">Photo Album</label>
-          <div className="flex gap-2 mb-2">
+          <div className="border-2 border-dashed border-navy-light rounded-lg p-6 text-center mb-4">
             <input
-              type="url"
-              value={newPhoto}
-              onChange={(e) => setNewPhoto(e.target.value)}
-              className="flex-1 p-3 border border-navy-light rounded-lg focus:outline-none focus:ring-2 focus:ring-navy"
-              placeholder="Add photo URL"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const formData = new FormData();
+                  formData.append('file', file);
+                  formData.append('folder', 'vehicles');
+                  fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                  })
+                    .then(res => res.json())
+                    .then(data => addPhoto({ url: data.url }));
+                }
+              }}
+              className="hidden"
+              id="album-upload"
             />
-            <button
-              type="button"
-              onClick={addPhoto}
-              className="bg-navy-light text-cream px-6 py-3 rounded-lg hover:bg-navy transition-colors"
-            >
-              Add
-            </button>
+            <label htmlFor="album-upload" className="cursor-pointer">
+              <p className="text-navy font-medium">Click to add photo to album</p>
+              <p className="text-sm text-navy-light">You can add metadata after uploading</p>
+            </label>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {formData.photoAlbum.map((photo, index) => (
               <div key={index} className="relative">
-                <img src={photo} alt={`Photo ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                <img src={photo.url} alt={photo.title || `Photo ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                {photo.title && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-navy bg-opacity-75 text-cream text-xs p-1 truncate">
+                    {photo.title}
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => removePhoto(index)}

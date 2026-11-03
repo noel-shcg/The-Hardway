@@ -17,8 +17,16 @@
     "status": "service-worthy",
     "primaryPhoto": "https://via.placeholder.com/800x600/1E3A8A/FFFDD0?text=Bus+001",
     "photoAlbum": [
-      "https://via.placeholder.com/400x300/1E3A8A/FFFDD0?text=Interior",
-      "https://via.placeholder.com/400x300/1E3A8A/FFFDD0?text=Exterior"
+      {
+        "url": "https://via.placeholder.com/400x300/1E3A8A/FFFDD0?text=Interior",
+        "title": "Interior View",
+        "description": "Looking towards the front of the bus"
+      },
+      {
+        "url": "https://via.placeholder.com/400x300/1E3A8A/FFFDD0?text=Exterior",
+        "title": "Exterior View",
+        "description": "Side profile of the vehicle"
+      }
     ],
     "liveryImage": "https://via.placeholder.com/380x260/1E3A8A/FFFDD0?text=Livery",
     "reviews": []

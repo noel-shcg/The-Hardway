@@ -1,7 +1,14 @@
-import { getVehicleById } from '@/lib/data';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { getVehicleById, updateVehicle } from '@/lib/client-data';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import DeleteReviewButton from '@/components/DeleteReviewButton';
+import EditPhotoMetadata from '@/components/EditPhotoMetadata';
+import { ImageMetadata } from '@/types';
+
+export const dynamic = 'force-dynamic';
 
 const statusColors = {
   'service-worthy': 'bg-green-500',
@@ -11,11 +18,35 @@ const statusColors = {
   'auxillary': 'bg-blue-500',
 };
 
-export default function VehicleDetail({ params }: { params: { id: string } }) {
-  const vehicle = getVehicleById(params.id);
+export default function VehicleDetail() {
+  const router = useRouter();
+  const params = useParams();
+  const [vehicle, setVehicle] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadVehicle = async () => {
+      const v = await getVehicleById(params.id as string);
+      setVehicle(v);
+      setLoading(false);
+    };
+    loadVehicle();
+  }, [params.id]);
+
+  const handlePhotoMetadataUpdate = async (index: number, metadata: ImageMetadata) => {
+    if (!vehicle) return;
+    const updatedAlbum = [...vehicle.photoAlbum];
+    updatedAlbum[index] = metadata;
+    const updated = await updateVehicle(params.id as string, { photoAlbum: updatedAlbum });
+    if (updated) setVehicle(updated);
+  };
+
+  if (loading) {
+    return <div className="max-w-7xl mx-auto px-4 py-8">Loading...</div>;
+  }
 
   if (!vehicle) {
-    notFound();
+    return <div className="max-w-7xl mx-auto px-4 py-8">Vehicle not found</div>;
   }
 
   return (
@@ -28,11 +59,30 @@ export default function VehicleDetail({ params }: { params: { id: string } }) {
       </Link>
 
       {vehicle.primaryPhoto && (
-        <img
-          src={vehicle.primaryPhoto}
-          alt={`Vehicle ${vehicle.fleetNumber}`}
-          className="w-full h-96 object-cover rounded-lg mb-8"
-        />
+        <div className="mb-8">
+          <img
+            src={vehicle.primaryPhoto}
+            alt={`Vehicle ${vehicle.fleetNumber}`}
+            className="w-full h-96 object-cover rounded-lg"
+          />
+          {vehicle.primaryPhotoMetadata && (vehicle.primaryPhotoMetadata.title || vehicle.primaryPhotoMetadata.description) && (
+            <div className="bg-cream-dark p-4 rounded-lg mt-2">
+              {vehicle.primaryPhotoMetadata.title && (
+                <p className="font-bold text-navy">{vehicle.primaryPhotoMetadata.title}</p>
+              )}
+              {vehicle.primaryPhotoMetadata.description && (
+                <p className="text-navy-light">{vehicle.primaryPhotoMetadata.description}</p>
+              )}
+              {(vehicle.primaryPhotoMetadata.location || vehicle.primaryPhotoMetadata.date || vehicle.primaryPhotoMetadata.time) && (
+                <div className="text-sm text-navy-light flex flex-wrap gap-3 mt-2">
+                  {vehicle.primaryPhotoMetadata.location && <span>📍 {vehicle.primaryPhotoMetadata.location}</span>}
+                  {vehicle.primaryPhotoMetadata.date && <span>📅 {vehicle.primaryPhotoMetadata.date}</span>}
+                  {vehicle.primaryPhotoMetadata.time && <span>🕐 {vehicle.primaryPhotoMetadata.time}</span>}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
@@ -117,14 +167,41 @@ export default function VehicleDetail({ params }: { params: { id: string } }) {
           {vehicle.photoAlbum.length > 0 && (
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h2 className="text-2xl font-bold text-navy mb-4">Photo Album</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {vehicle.photoAlbum.map((photo, index) => (
-                  <img
-                    key={index}
-                    src={photo}
-                    alt={`Photo ${index + 1}`}
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {vehicle.photoAlbum.map((photo: any, index: number) => (
+                  <div key={index} className="space-y-2">
+                    <img
+                      src={typeof photo === 'string' ? photo : photo.url}
+                      alt={typeof photo === 'string' ? `Photo ${index + 1}` : photo.title || `Photo ${index + 1}`}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    {typeof photo !== 'string' && (
+                      <>
+                        {(photo.title || photo.description || photo.location || photo.date) && (
+                          <div className="bg-cream-dark p-3 rounded-lg space-y-1">
+                            {photo.title && (
+                              <p className="font-bold text-navy">{photo.title}</p>
+                            )}
+                            {photo.description && (
+                              <p className="text-sm text-navy-light">{photo.description}</p>
+                            )}
+                            {(photo.location || photo.date || photo.time) && (
+                              <div className="text-xs text-navy-light flex flex-wrap gap-2">
+                                {photo.location && <span>📍 {photo.location}</span>}
+                                {photo.date && <span>📅 {photo.date}</span>}
+                                {photo.time && <span>🕐 {photo.time}</span>}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <EditPhotoMetadata
+                          photo={photo}
+                          index={index}
+                          onUpdate={handlePhotoMetadataUpdate}
+                        />
+                      </>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
@@ -171,12 +248,24 @@ export default function VehicleDetail({ params }: { params: { id: string } }) {
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold text-navy mb-4">Livery</h2>
             {vehicle.liveryImage && (
-              <div className="aspect-[38/26] overflow-hidden rounded-lg">
-                <img
-                  src={vehicle.liveryImage}
-                  alt={`${vehicle.livery} livery`}
-                  className="w-full h-full object-cover"
-                />
+              <div>
+                <div className="aspect-[38/26] overflow-hidden rounded-lg">
+                  <img
+                    src={vehicle.liveryImage}
+                    alt={`${vehicle.livery} livery`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {vehicle.liveryImageMetadata && (vehicle.liveryImageMetadata.title || vehicle.liveryImageMetadata.description) && (
+                  <div className="bg-cream-dark p-3 rounded-lg mt-2">
+                    {vehicle.liveryImageMetadata.title && (
+                      <p className="font-bold text-navy text-sm">{vehicle.liveryImageMetadata.title}</p>
+                    )}
+                    {vehicle.liveryImageMetadata.description && (
+                      <p className="text-navy-light text-xs">{vehicle.liveryImageMetadata.description}</p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

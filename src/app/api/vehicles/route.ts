@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     ...body,
     id: Date.now().toString(),
     reviews: body.reviews || [],
+    photoAlbum: body.photoAlbum || [],
   };
   vehicles.push(newVehicle);
   fs.writeFileSync(vehiclesFile, JSON.stringify(vehicles, null, 2));

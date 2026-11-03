@@ -4,6 +4,15 @@ export type VehicleFeature = 'USB-A' | 'USB-C' | 'WiFi' | 'announcements' | 'fli
 
 export type VehicleStatus = 'service-worthy' | 'off-road' | 'away' | 'trainer' | 'auxillary';
 
+export interface ImageMetadata {
+  url: string;
+  title?: string;
+  description?: string;
+  location?: string;
+  date?: string;
+  time?: string;
+}
+
 export interface Vehicle {
   id: string;
   registration: string;
@@ -21,8 +30,10 @@ export interface Vehicle {
   vehicleJoinedFleet: string;
   status: VehicleStatus;
   primaryPhoto: string;
-  photoAlbum: string[];
+  primaryPhotoMetadata?: ImageMetadata;
+  photoAlbum: ImageMetadata[];
   liveryImage: string;
+  liveryImageMetadata?: ImageMetadata;
   reviews: Review[];
 }
 
