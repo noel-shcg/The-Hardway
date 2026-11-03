@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { isAuthenticated } from '@/lib/auth';
+import { BlogPost } from '@/types';
 
 const dataDir = path.join(process.cwd(), 'data');
 const blogPostsFile = path.join(dataDir, 'blog-posts.json');
@@ -11,7 +13,7 @@ export async function GET(
 ) {
   const { id } = await params;
   const posts = JSON.parse(fs.readFileSync(blogPostsFile, 'utf-8'));
-  const post = posts.find((p: any) => p.id === id);
+  const post = posts.find((p: BlogPost) => p.id === id);
   if (!post) {
     return NextResponse.json({ error: 'Post not found' }, { status: 404 });
   }
@@ -22,10 +24,13 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
   const { id } = await params;
   const body = await request.json();
   const posts = JSON.parse(fs.readFileSync(blogPostsFile, 'utf-8'));
-  const index = posts.findIndex((p: any) => p.id === id);
+  const index = posts.findIndex((p: BlogPost) => p.id === id);
   if (index === -1) {
     return NextResponse.json({ error: 'Post not found' }, { status: 404 });
   }
@@ -42,9 +47,12 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
   const { id } = await params;
   const posts = JSON.parse(fs.readFileSync(blogPostsFile, 'utf-8'));
-  const filtered = posts.filter((p: any) => p.id !== id);
+  const filtered = posts.filter((p: BlogPost) => p.id !== id);
   if (filtered.length === posts.length) {
     return NextResponse.json({ error: 'Post not found' }, { status: 404 });
   }

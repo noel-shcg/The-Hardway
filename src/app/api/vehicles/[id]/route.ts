@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { isAuthenticated } from '@/lib/auth';
+import { Vehicle } from '@/types';
 
 const dataDir = path.join(process.cwd(), 'data');
 const vehiclesFile = path.join(dataDir, 'vehicles.json');
@@ -11,7 +13,7 @@ export async function GET(
 ) {
   const { id } = await params;
   const vehicles = JSON.parse(fs.readFileSync(vehiclesFile, 'utf-8'));
-  const vehicle = vehicles.find((v: any) => v.id === id);
+  const vehicle = vehicles.find((v: Vehicle) => v.id === id);
   if (!vehicle) {
     return NextResponse.json({ error: 'Vehicle not found' }, { status: 404 });
   }
@@ -22,10 +24,13 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
   const { id } = await params;
   const body = await request.json();
   const vehicles = JSON.parse(fs.readFileSync(vehiclesFile, 'utf-8'));
-  const index = vehicles.findIndex((v: any) => v.id === id);
+  const index = vehicles.findIndex((v: Vehicle) => v.id === id);
   if (index === -1) {
     return NextResponse.json({ error: 'Vehicle not found' }, { status: 404 });
   }
@@ -38,9 +43,12 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
   const { id } = await params;
   const vehicles = JSON.parse(fs.readFileSync(vehiclesFile, 'utf-8'));
-  const filtered = vehicles.filter((v: any) => v.id !== id);
+  const filtered = vehicles.filter((v: Vehicle) => v.id !== id);
   if (filtered.length === vehicles.length) {
     return NextResponse.json({ error: 'Vehicle not found' }, { status: 404 });
   }

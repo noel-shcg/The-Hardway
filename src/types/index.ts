@@ -35,6 +35,7 @@ export interface Vehicle {
   liveryImage: string;
   liveryImageMetadata?: ImageMetadata;
   reviews: Review[];
+  featured?: boolean;
 }
 
 export interface Review {
@@ -53,6 +54,10 @@ export interface BlogPost {
   body: string;
   author: string;
   linkedVehicleId?: string;
+  relatedVehicleIds?: string[];
+  categories?: string[];
+  tags?: string[];
+  featured?: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 
 export async function isAuthenticated(): Promise<boolean> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const auth = cookieStore.get('auth');
   return auth?.value === 'true';
 }

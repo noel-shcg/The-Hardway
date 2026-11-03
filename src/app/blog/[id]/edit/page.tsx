@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { getVehicles, getBlogPostById, updateBlogPost } from '@/lib/client-data';
+import { Vehicle } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
 export default function EditBlogPost() {
   const router = useRouter();
   const params = useParams();
-  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -17,6 +18,10 @@ export default function EditBlogPost() {
     body: '',
     author: '',
     linkedVehicleId: '',
+    relatedVehicleIds: [] as string[],
+    categories: [] as string[],
+    tags: '',
+    featured: false,
     photoAlbum: [] as string[],
   });
 
@@ -36,6 +41,10 @@ export default function EditBlogPost() {
           body: post.body,
           author: post.author,
           linkedVehicleId: post.linkedVehicleId || '',
+          relatedVehicleIds: post.relatedVehicleIds || (post.linkedVehicleId ? [post.linkedVehicleId] : []),
+          categories: post.categories || [],
+          tags: (post.tags || []).join(', '),
+          featured: post.featured || false,
           photoAlbum: post.photoAlbum,
         });
       }
@@ -47,7 +56,7 @@ export default function EditBlogPost() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateBlogPost(params.id as string, formData);
+    await updateBlogPost(params.id as string, { ...formData, tags: formData.tags.split(',').map((item) => item.trim()).filter(Boolean) });
     router.push(`/blog/${params.id}`);
   };
 
@@ -107,6 +116,13 @@ export default function EditBlogPost() {
         </div>
 
         <div>
+          <label className="flex items-center gap-2 text-navy font-medium">
+            <input type="checkbox" checked={formData.featured} onChange={(e) => setFormData({ ...formData, featured: e.target.checked })} />
+            Feature this post
+          </label>
+        </div>
+
+        <div>
           <label className="block text-navy font-medium mb-2">Link to Vehicle (Optional)</label>
           <select
             value={formData.linkedVehicleId}
@@ -120,6 +136,27 @@ export default function EditBlogPost() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label className="block text-navy font-medium mb-2">Related Vehicles</label>
+          <div className="flex flex-wrap gap-3">
+            {vehicles.map((vehicle) => (
+              <label key={vehicle.id} className="flex items-center gap-2 text-navy">
+                <input type="checkbox" checked={formData.relatedVehicleIds.includes(vehicle.id)} onChange={(e) => setFormData({ ...formData, relatedVehicleIds: e.target.checked ? [...formData.relatedVehicleIds, vehicle.id] : formData.relatedVehicleIds.filter((id) => id !== vehicle.id) })} />
+                {vehicle.fleetNumber} - {vehicle.registration}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="block text-navy font-medium">Categories (badges)
+            <input type="text" value={formData.categories.join(', ')} onChange={(e) => setFormData({ ...formData, categories: e.target.value.split(',').map((item) => item.trim()).filter(Boolean) })} className="w-full mt-2 p-3 border border-navy-light rounded-lg" />
+          </label>
+          <label className="block text-navy font-medium">Tags
+            <input type="text" value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} className="w-full mt-2 p-3 border border-navy-light rounded-lg" />
+          </label>
         </div>
 
         <div>

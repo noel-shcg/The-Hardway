@@ -1,12 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Suspense, useState, useEffect } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 function NavigationContent() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -23,7 +26,8 @@ function NavigationContent() {
   const handleLogout = async () => {
     await fetch('/api/auth/login', { method: 'DELETE' });
     setIsLoggedIn(false);
-    window.location.href = '/';
+    router.push('/');
+    router.refresh();
   };
 
   const isActive = (path: string) => pathname === path;
@@ -34,7 +38,15 @@ function NavigationContent() {
         <Link href="/" className="text-2xl font-bold hover:text-cream-dark transition-colors">
           The Hardway
         </Link>
-        <div className="flex gap-6 items-center">
+        <button
+          type="button"
+          className="md:hidden text-cream text-2xl"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle navigation menu"
+        >
+          ☰
+        </button>
+        <div className={`${menuOpen ? 'flex' : 'hidden'} absolute top-16 left-0 right-0 bg-navy p-4 flex-col gap-4 md:static md:flex md:flex-row md:p-0 items-center z-20`}>
           <Link 
             href="/" 
             className={`hover:text-cream-dark transition-colors ${isActive('/') ? 'font-bold' : ''}`}
@@ -68,6 +80,7 @@ function NavigationContent() {
               Login
             </Link>
           )}
+          <ThemeToggle />
         </div>
       </div>
     </nav>
