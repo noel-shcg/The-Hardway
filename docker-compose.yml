@@ -1,0 +1,20 @@
+services:
+  the-hardway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    volumes:
+      - hardway-data:/app/data
+      - hardway-uploads:/app/public/vehicles
+    restart: unless-stopped
+
+volumes:
+  hardway-data:
+  hardway-uploads:
